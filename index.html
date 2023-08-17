@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jogo da Memória</title>
+    <style>
+        body {
+            background-image: url('img/fundo.jpg');
+            background-size: 100%;
+            padding-top: 80px;
+            backg
+        }
+        #box { 
+            display: flex;
+            justify-content: center;
+        }
+
+        #box table {
+            border:1px solid #61677A;
+            opacity: calc(100);
+
+        }
+
+        #box table tr td:hover {
+            cursor:pointer;
+        }
+
+        #box table tr td img {
+            width: 100px;
+            height: 100px;
+        }
+
+        #box table tr td {
+            border:1px solid #61677A;
+            width: 100px;
+            height: 100px;
+            background-image: url('img/card.jpg');
+        }
+
+        #controls {
+            margin: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        #controls button {
+            background-color: black;
+            color:#fff;
+            cursor:pointer;
+        }
+
+        #controls button:hover {
+            background-color: blueviolet;
+        }
+    </style>
+</head>
+<body>
+    <div id="box">
+        <table></table>
+    </div>
+    <div id="controls">
+        <button onclick="iniciar();" id="btnIniciar">Iniciar Jogo</button>
+        <button onclick="exibirCartas();" id="btnRecomecar">Recomeçar</button>
+    </div>
+</body>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.7.0/dist/jquery.min.js"></script>
+<script>
+    
+    /*6 imagens*/
+    var imagens = [
+            { 'par':1, 'url':'https://static.todamateria.com.br/upload/pa/is/paisagem-natural-og.jpg' },
+            { 'par':2, 'url':'https://cursinhoparamedicina.com.br/wp-content/uploads/2022/10/Paisagem-1.jpg' },
+            { 'par':3, 'url':'https://images.ecycle.com.br/wp-content/uploads/2021/05/20195924/o-que-e-paisagem.jpg.webp' },
+            { 'par':4, 'url':'https://img.freepik.com/fotos-gratis/paisagem-de-nevoeiro-matinal-e-montanhas-com-baloes-de-ar-quente-ao-nascer-do-sol_335224-794.jpg' },
+            { 'par':5, 'url':'https://thumbs.dreamstime.com/b/belas-fotos-rosa-e-roxo-no-infravermelho-de-paisagens-rurais-na-europa-lindas-infravermelhos-roxos-cor-alemanha-157831242.jpg' },
+            { 'par':6, 'url':'https://fotodicasbrasil.com.br/wp-content/uploads/2014/04/destacada_paisagens2.jpg' }
+    ];
+
+    /* Função para randomizar array */
+    function shuffleArray(arr) {
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+    }
+
+    /* Gera as cartas das imagens */
+    function exibirCartas() {
+        $('#btnIniciar').slideDown();
+        if($('table').length > 0) $('table').html(``);
+        var cartas = [].concat(imagens, imagens);
+        cartas = shuffleArray(cartas);
+        for(let i = 0; i < 4; i++) {
+            let j = i * 3;
+            $('table').append(`<tr>
+                <td par="${cartas[j]['par']}"><img src="${cartas[j]['url']}" exibindo="0" encontrou="0"></td>
+                <td par="${cartas[j+1]['par']}"><img src="${cartas[j+1]['url']}" exibindo="0" encontrou="0"></td>
+                <td par="${cartas[j+2]['par']}"><img src="${cartas[j+2]['url']}" exibindo="0" encontrou="0"></td>
+            </tr>`);
+        }
+    }
+
+    function ocultarCartas() {
+        $('table img[encontrou=0]').slideUp(200);
+    }
+
+    var qtdVisivel = 0;
+    var imagensVisiveis = [];
+    var paresEncontrados = 0;
+    var tentativas = 0;
+
+    function iniciar() {
+        $('#btnIniciar').slideUp();
+        qtdVisivel = 0;
+        ocultarCartas();
+        
+        $('table tr td').click(function() {
+            if($(this).find('img').attr('exibindo') == 1) 
+                return console.log('Imagem já exibida');
+
+            if(qtdVisivel > 1) {
+                qtdVisivel = 0;
+                imagensVisiveis = [];
+                $('table tr td img[exibindo=1]').attr('exibindo', 0);
+                console.log('Oculta as imagens... Tentar novamente!');
+                tentativas++;
+                console.log('Tentativa'+tentativas);
+                return ocultarCartas();
+            }
+            
+            let numPar = $(this).attr('par');
+            console.log('Par da figura'+numPar);
+            imagensVisiveis.push(numPar);
+            console.log(imagensVisiveis);
+            $(this).find('img').attr('exibindo', 1);
+            if(imagensVisiveis.length == 2) {
+                if(imagensVisiveis[0] == imagensVisiveis[1]) {
+                    console.log('Imagens iguais!');
+                    $('table tr').find(`td[par=${imagensVisiveis[0]}]`).css({'border':'1px solid #89375F'});
+                    $('table tr').find(`td[par=${imagensVisiveis[0]}] img`).attr('encontrou', 1);
+                    paresEncontrados++;
+                }
+            }
+            
+            qtdVisivel++;
+            $(this).find('img').show();
+
+            if(paresEncontrados == 6) {
+                setTimeout(function(){
+                    alert('Jogo Finalizado! Parabéns você terminou! Houve '+tentativas+' tentativas!');
+                    $('#btnRecomecar').click();
+                }, 2000)
+                
+            }
+        });
+    }
+
+    $(document).ready(function(){
+        exibirCartas();
+    });
+</script>
+</html>
